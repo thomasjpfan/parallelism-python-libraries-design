@@ -1,0 +1,23 @@
+project:
+  type: website
+
+website:
+  title: Parallelism in Numerical Python Libraries
+  navbar:
+    left:
+      - href: index.qmd
+        text: " "
+  page-footer:
+    left: "Copyright 2022, Thomas J. Fan"
+    right:
+      - icon: github
+        href: https://github.com/thomaspfan/parallelism-python-libraries
+
+format:
+  html:
+    theme: pulse
+    css: styles.css
+    toc: true
+
+
+
