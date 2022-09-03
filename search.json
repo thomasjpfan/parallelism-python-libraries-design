@@ -39,7 +39,7 @@
     "href": "index.html#which-compiler-to-use-for-openmp",
     "title": "Parallalism in Numerical Python Libraries",
     "section": "Which compiler to use for OpenMP?",
-    "text": "Which compiler to use for OpenMP?\nThere are two options: libgomp (OpenMP for GCC) or libomp (Clang for GCC). libgomp is not fork safe, but uses the GCC. We advocate for the patch into GCC to make it fork safe. libomp is fork safe, but it is an implementation detail and not part of the OpenMP specification. I would go with libomp, because it has the same symbols as libgomp and is fork safe. Upstream libraries such as NumPy or SciPy can still use GCC as their compiler."
+    "text": "Which compiler to use for OpenMP?\nThere are two options: libgomp (OpenMP for GCC) or libomp (Clang for GCC).\n\nlibgomp is not fork safe, but uses the GCC. We advocate for the patch in GCC to make it fork safe.\nlibomp is fork safe, but it is an implementation detail and not part of the OpenMP specification.\n\nI propose going with libomp, because it has the same symbols as libgomp and is fork safe. Upstream libraries such as NumPy or SciPy can still use GCC as their compiler. There is an existing discussion in SciPy regarding OpenMP adoption and the compiler choice: scipy#10239."
   },
   {
     "objectID": "index.html#how-does-conda-forge-work",

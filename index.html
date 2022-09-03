@@ -232,7 +232,12 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="which-compiler-to-use-for-openmp" class="level2">
 <h2 class="anchored" data-anchor-id="which-compiler-to-use-for-openmp">Which compiler to use for OpenMP?</h2>
-<p>There are two options: libgomp (OpenMP for GCC) or libomp (Clang for GCC). libgomp is not fork safe, but uses the GCC. We advocate for the patch into GCC to make it fork safe. libomp is fork safe, but it is an implementation detail and not part of the OpenMP specification. I would go with libomp, because it has the same symbols as libgomp and is fork safe. Upstream libraries such as NumPy or SciPy can still use GCC as their compiler.</p>
+<p>There are two options: libgomp (OpenMP for GCC) or libomp (Clang for GCC).</p>
+<ul>
+<li>libgomp is not fork safe, but uses the GCC. We advocate for the <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60035">patch in GCC</a> to make it fork safe.</li>
+<li>libomp is fork safe, but it is an implementation detail and not part of the OpenMP specification.</li>
+</ul>
+<p>I propose going with libomp, because it has the same symbols as libgomp and is fork safe. Upstream libraries such as NumPy or SciPy can still use GCC as their compiler. There is an existing discussion in SciPy regarding OpenMP adoption and the compiler choice: <a href="https://github.com/scipy/scipy/issues/10239">scipy#10239</a>.</p>
 </section>
 <section id="how-does-conda-forge-work" class="level2">
 <h2 class="anchored" data-anchor-id="how-does-conda-forge-work">How does conda-forge work?</h2>
