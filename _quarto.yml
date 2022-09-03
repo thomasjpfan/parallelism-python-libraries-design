@@ -11,7 +11,7 @@ website:
       - href: index.qmd
         text: " "
   page-footer:
-    left:
+    center:
       - icon: github
         href: https://github.com/thomasjpfan/parallelism-python-libraries-design
 
