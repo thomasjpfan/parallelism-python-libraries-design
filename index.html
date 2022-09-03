@@ -162,11 +162,21 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="issues-with-the-current-landscape" class="level1">
 <h1>Issues with the Current Landscape</h1>
-<p>The current landscape has three broad categories of issues: - APIs for controlling parallelism is not consistent between libraries. - By default, BLAS and scikit-learn’s OpenMP are multi-threaded and can lead to unexpected problems. - Interactions between different forms of parallelism may lead to slowdowns, crashes, or oversubscription.</p>
+<p>The current landscape has three broad categories of issues:</p>
+<ul>
+<li>APIs for controlling parallelism is not consistent between libraries.</li>
+<li>By default, BLAS and scikit-learn’s OpenMP are multi-threaded and can lead to unexpected problems.</li>
+<li>Interactions between different forms of parallelism may lead to slowdowns, crashes, or oversubscription.</li>
+</ul>
 <section id="apis-for-configuring-parallelism" class="level2">
 <h2 class="anchored" data-anchor-id="apis-for-configuring-parallelism">APIs for Configuring Parallelism</h2>
 <p>There are three ways to configure parallelism across the libraries: environment variables, <code>threadpoolctl</code>, or library-specific Python API.</p>
-<p>Examples of environment variables consist of: - <code>OPENBLAS_NUM_THREADS</code> for OpenBLAS - <code>MKL_NUM_THREADS</code> for MKL - <code>OMP_NUM_THREADS</code> for OpenMP</p>
+<p>Examples of environment variables consist of:</p>
+<ul>
+<li><code>OPENBLAS_NUM_THREADS</code> for OpenBLAS</li>
+<li><code>MKL_NUM_THREADS</code> for MKL</li>
+<li><code>OMP_NUM_THREADS</code> for OpenMP</li>
+</ul>
 <p>These environment variables control how many threads a specific backend uses. These environment variables do not influence code that does not use a particular backend, like OpenMP. For example, SciPy’s <code>fft</code> module uses pthreads directly.</p>
 <p>Threadpoolctl provides a Python interface for configuring the number of threads in OpenBLAS, MKL, and OpenMP. Linear algebra function calls from NumPy, SciPy, or scikit-learn can all be configured with threadpoolctl or an environment variable.</p>
 <p>SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy’s <code>n_workers</code> can mean multithreading, multiprocessing, or pthreads. Scikit-learn’s <code>n_jobs</code> is either multiprocessing or multithreading. threadpoolctl or <code>OMP_NUM_THREADS</code> configured scikit-learn’s computation routines that use OpenMP. Note that scikit-learn’s <code>n_jobs</code> does not configure OpenMP parallelism.</p>
@@ -205,7 +215,12 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 <section id="proposal-2" class="level3">
 <h3 class="anchored" data-anchor-id="proposal-2">Proposal</h3>
-<p>The following are feasible steps we can take to improve the issues listed above: - The library sends a warning or error to notify the user when a known issue is detected. For example, <a href="https://github.com/numba/numba/blob/2e9b58cfce0391b968ab8c7c84393cc12c4d1bfb/numba/np/ufunc/omppool.cpp#L107-L124">Numba detects</a> when libgomp and fork are used together, raising an error. - The library detects and raises a warning recommending <code>MKL_THREADING_LAYER</code> when LLVM OpenMP and Intel OpenMP are loaded together. For example, threadpoolctl <a href="https://github.com/joblib/threadpoolctl/blob/a39c6a49a297d0ef941269fc655670b63edab84c/threadpoolctl.py#L750-L762">has such a warning</a>. - Move towards a single OpenMP and OpenBLAS on PyPI by shipping an OpenMP and OpenBLAS wheel. NumPy, SciPy, and Scikit-learn will link to those libraries during runtime. Please see the <a href="#technical-details">technical details section</a> for details on how this could work.</p>
+<p>The following are feasible steps we can take to improve the issues listed above:</p>
+<ul>
+<li>The library sends a warning or error to notify the user when a known issue is detected. For example, <a href="https://github.com/numba/numba/blob/2e9b58cfce0391b968ab8c7c84393cc12c4d1bfb/numba/np/ufunc/omppool.cpp#L107-L124">Numba detects</a> when libgomp and fork are used together, raising an error.</li>
+<li>The library detects and raises a warning recommending <code>MKL_THREADING_LAYER</code> when LLVM OpenMP and Intel OpenMP are loaded together. For example, threadpoolctl <a href="https://github.com/joblib/threadpoolctl/blob/a39c6a49a297d0ef941269fc655670b63edab84c/threadpoolctl.py#L750-L762">has such a warning</a>.</li>
+<li>Move towards a single OpenMP and OpenBLAS on PyPI by shipping an OpenMP and OpenBLAS wheel. NumPy, SciPy, and Scikit-learn will link to those libraries during runtime. Please see the <a href="#technical-details">technical details section</a> for details on how this could work.</li>
+</ul>
 </section>
 </section>
 </section>
