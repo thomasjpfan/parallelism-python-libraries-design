@@ -19,7 +19,9 @@ On PyPi, if a library requires OpenMP or OpenBLAS, it bundles the shared library
 
 
 # Issues with the Current Landscape
+
 The current landscape has three broad categories of issues:
+
 - APIs for controlling parallelism is not consistent between libraries.
 - By default, BLAS and scikit-learn's OpenMP are multi-threaded and can lead to unexpected problems.
 - Interactions between different forms of parallelism may lead to slowdowns, crashes, or oversubscription.
@@ -29,6 +31,7 @@ The current landscape has three broad categories of issues:
 There are three ways to configure parallelism across the libraries: environment variables, `threadpoolctl`, or library-specific Python API.
 
 Examples of environment variables consist of:
+
 - `OPENBLAS_NUM_THREADS` for OpenBLAS
 - `MKL_NUM_THREADS` for MKL
 - `OMP_NUM_THREADS` for OpenMP
@@ -51,6 +54,7 @@ I see the solution in two steps:
 BLAS implementations such as OpenBLAS are multi-threaded by default. Scikit-learn followed this convention with OpenMP, which is also multi-threaded by default. Using all the CPU cores by default is convenient for interactive use cases like in a Jupyter Notebook. The downside of using all CPU cores is during deployment to shared environments. The user needs to know which API to configure their program to become serial from the above section.
 
 ### Proposal
+
 There are two options:
 
 - Keep the status quo where BLAS is multi-threaded by default. Libraries such as scikit-learn's OpenMP accelerated routines will continue to be parallel as the default.
@@ -72,6 +76,7 @@ When different parallelism interfaces are running concurrently, it is possible t
 
 ### Proposal
 The following are feasible steps we can take to improve the issues listed above:
+
 - The library sends a warning or error to notify the user when a known issue is detected. For example, [Numba detects](https://github.com/numba/numba/blob/2e9b58cfce0391b968ab8c7c84393cc12c4d1bfb/numba/np/ufunc/omppool.cpp#L107-L124) when libgomp and fork are used together, raising an error.
 - The library detects and raises a warning recommending `MKL_THREADING_LAYER` when LLVM OpenMP and Intel OpenMP are loaded together. For example, threadpoolctl [has such a warning](https://github.com/joblib/threadpoolctl/blob/a39c6a49a297d0ef941269fc655670b63edab84c/threadpoolctl.py#L750-L762).
 - Move towards a single OpenMP and OpenBLAS on PyPI by shipping an OpenMP and OpenBLAS wheel. NumPy, SciPy, and Scikit-learn will link to those libraries during runtime. Please see the [technical details section](#technical-details) for details on how this could work.
@@ -84,12 +89,14 @@ The following are feasible steps we can take to improve the issues listed above:
 OpenMP and OpenBLAS are shipped wheels with their header files. When building an upstream library such as NumPy, extensions will use RPATH to link to the OpenMP and OpenBLAS wheels. `auditwheel repair` needs a patch so that it does not copy PyPi libraries into the wheel: [auditwheel#392](https://github.com/pypa/auditwheel/pull/392). Note that [PEP513](https://peps.python.org/pep-0513/#auditwheel), explicitly allows for shared libraries to be distributed as separate packages on PyPI.
 
 ## Which compiler to use for OpenMP?
+
 There are two options: libgomp (OpenMP for GCC) or libomp (Clang for GCC).
 libgomp is not fork safe, but uses the GCC. We advocate for the patch into GCC to make it fork safe.
 libomp is fork safe, but it is an implementation detail and not part of the OpenMP specification.
 I would go with libomp, because it has the same symbols as libgomp and is fork safe. Upstream libraries such as NumPy or SciPy can still use GCC as their compiler.
 
 ## How does conda-forge work?
+
 For BLAS, conda-forge builds with netlib. During installation time, BLAS can be switched to other implementations such as MKL, BLIS, OpenBLAS. See [this link for details](https://conda-forge.org/docs/maintainer/knowledge_base.html#switching-blas-implementation).
 
 For OpenMP, conda-forge builds with libgomp, the GNU build of OpenMP. During installation time, OpenMP can be switched to libomp, the LLVM build of OpenMP. Recall that the LLVM implementation is fork-safe. Note, that the GNU implementation has target offloading symbols, while LLVM does not. See this [link for details](https://conda-forge.org/docs/maintainer/knowledge_base.html#openmp).
