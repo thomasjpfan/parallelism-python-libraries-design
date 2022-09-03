@@ -101,15 +101,24 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#current-landscape" id="toc-current-landscape" class="nav-link active" data-scroll-target="#current-landscape">Current Landscape</a></li>
   <li><a href="#issues-with-the-current-landscape" id="toc-issues-with-the-current-landscape" class="nav-link" data-scroll-target="#issues-with-the-current-landscape">Issues with the Current Landscape</a>
   <ul class="collapse">
-  <li><a href="#apis-for-configuring-parallelism" id="toc-apis-for-configuring-parallelism" class="nav-link" data-scroll-target="#apis-for-configuring-parallelism">APIs for Configuring Parallelism</a></li>
-  <li><a href="#multi-threaded-by-default" id="toc-multi-threaded-by-default" class="nav-link" data-scroll-target="#multi-threaded-by-default">Multi-threaded by Default</a></li>
-  <li><a href="#interactions-between-different-forms-of-parallelism" id="toc-interactions-between-different-forms-of-parallelism" class="nav-link" data-scroll-target="#interactions-between-different-forms-of-parallelism">Interactions Between Different Forms of Parallelism</a></li>
+  <li><a href="#apis-for-configuring-parallelism" id="toc-apis-for-configuring-parallelism" class="nav-link" data-scroll-target="#apis-for-configuring-parallelism">APIs for Configuring Parallelism</a>
+  <ul class="collapse">
+  <li><a href="#proposal" id="toc-proposal" class="nav-link" data-scroll-target="#proposal">Proposal</a></li>
+  </ul></li>
+  <li><a href="#multi-threaded-by-default" id="toc-multi-threaded-by-default" class="nav-link" data-scroll-target="#multi-threaded-by-default">Multi-threaded by Default</a>
+  <ul class="collapse">
+  <li><a href="#proposal-1" id="toc-proposal-1" class="nav-link" data-scroll-target="#proposal-1">Proposal</a></li>
+  </ul></li>
+  <li><a href="#interactions-between-different-forms-of-parallelism" id="toc-interactions-between-different-forms-of-parallelism" class="nav-link" data-scroll-target="#interactions-between-different-forms-of-parallelism">Interactions Between Different Forms of Parallelism</a>
+  <ul class="collapse">
+  <li><a href="#proposal-2" id="toc-proposal-2" class="nav-link" data-scroll-target="#proposal-2">Proposal</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#technical-details" id="toc-technical-details" class="nav-link" data-scroll-target="#technical-details">Technical Details</a>
   <ul class="collapse">
   <li><a href="#how-to-ship-openmp-and-openblas-on-pypi" id="toc-how-to-ship-openmp-and-openblas-on-pypi" class="nav-link" data-scroll-target="#how-to-ship-openmp-and-openblas-on-pypi">How to ship OpenMP and OpenBLAS on PyPI?</a></li>
   <li><a href="#which-compiler-to-use-for-openmp" id="toc-which-compiler-to-use-for-openmp" class="nav-link" data-scroll-target="#which-compiler-to-use-for-openmp">Which compiler to use for OpenMP?</a></li>
-  <li><a href="#what-does-conda-forge-do" id="toc-what-does-conda-forge-do" class="nav-link" data-scroll-target="#what-does-conda-forge-do">What does conda-forge do?</a></li>
+  <li><a href="#how-does-conda-forge-work" id="toc-how-does-conda-forge-work" class="nav-link" data-scroll-target="#how-does-conda-forge-work">How does conda-forge work?</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -134,8 +143,8 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 <p>Welcome to the Design Document for CPU parallelism in NumPy, SciPy, scikit-learn, and pandas. Each library has varying levels of support for running parallel computation. This document details the current status of parallelism with shipping code on PyPI and possible paths for improvement.</p>
-<section id="current-landscape" class="level2">
-<h2 class="anchored" data-anchor-id="current-landscape">Current Landscape</h2>
+<section id="current-landscape" class="level1">
+<h1>Current Landscape</h1>
 <p>Each library ships with an assortment of parallel interfaces on PyPi:</p>
 <ul>
 <li>NumPy’s <code>linalg</code> module and matrix multiplication utilize OpenBLAS, which is multi-threaded by default. NumPy ships with OpenBLAS built with pthreads.</li>
@@ -143,26 +152,26 @@ ul.task-list li input[type="checkbox"] {
 <li>By default, most computation in Pandas runs in serial. The only parallel mechanism is enabled through Numba by setting passing <code>parallel=True</code> to engine_kwargs.</li>
 <li>Scikit-learn uses the <code>linalg</code> module from NumPy and SciPy, which is multi-threaded by default. Scikit-learn ships with OpenMP and runs OpenMP accelerated code in parallel by default. The library also has a <code>n_jobs</code> parameter that uses Python’s multithreading or loky, an improved Python-based Process Pool Executor.</li>
 </ul>
-<p>On PyPi, if a library requires OpenMP or OpenBLAS, it bundles the shared library into the wheel: <a href="https://www.slideshare.net/RalfGommers/parallelism-in-a-numpybased-program">Source</a></p>
+<p>On PyPi, if a library requires OpenMP or OpenBLAS, it bundles the shared library into the wheel:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/pypi.jpg" class="img-fluid figure-img" alt="NumPy, SciPy, and Scikit-learn vendoring shared libraries such as OpenMP or OpenBLAS"></p>
-<p></p><figcaption class="figure-caption">Current PyPI landscape</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Current PyPI landscape: <a href="https://www.slideshare.net/RalfGommers/parallelism-in-a-numpybased-program">image source</a></figcaption><p></p>
 </figure>
 </div>
 </section>
-<section id="issues-with-the-current-landscape" class="level2">
-<h2 class="anchored" data-anchor-id="issues-with-the-current-landscape">Issues with the Current Landscape</h2>
+<section id="issues-with-the-current-landscape" class="level1">
+<h1>Issues with the Current Landscape</h1>
 <p>The current landscape has three broad categories of issues: - APIs for controlling parallelism is not consistent between libraries. - By default, BLAS and scikit-learn’s OpenMP are multi-threaded and can lead to unexpected problems. - Interactions between different forms of parallelism may lead to slowdowns, crashes, or oversubscription.</p>
-<section id="apis-for-configuring-parallelism" class="level3">
-<h3 class="anchored" data-anchor-id="apis-for-configuring-parallelism">APIs for Configuring Parallelism</h3>
+<section id="apis-for-configuring-parallelism" class="level2">
+<h2 class="anchored" data-anchor-id="apis-for-configuring-parallelism">APIs for Configuring Parallelism</h2>
 <p>There are three ways to configure parallelism across the libraries: environment variables, <code>threadpoolctl</code>, or library-specific Python API.</p>
 <p>Examples of environment variables consist of: - <code>OPENBLAS_NUM_THREADS</code> for OpenBLAS - <code>MKL_NUM_THREADS</code> for MKL - <code>OMP_NUM_THREADS</code> for OpenMP</p>
 <p>These environment variables control how many threads a specific backend uses. These environment variables do not influence code that does not use a particular backend, like OpenMP. For example, SciPy’s <code>fft</code> module uses pthreads directly.</p>
 <p>Threadpoolctl provides a Python interface for configuring the number of threads in OpenBLAS, MKL, and OpenMP. Linear algebra function calls from NumPy, SciPy, or scikit-learn can all be configured with threadpoolctl or an environment variable.</p>
 <p>SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy’s <code>n_workers</code> can mean multithreading, multiprocessing, or pthreads. Scikit-learn’s <code>n_jobs</code> is either multiprocessing or multithreading. threadpoolctl or <code>OMP_NUM_THREADS</code> configured scikit-learn’s computation routines that use OpenMP. Note that scikit-learn’s <code>n_jobs</code> does not configure OpenMP parallelism.</p>
-<section id="proposal" class="level4">
-<h4 class="anchored" data-anchor-id="proposal">Proposal</h4>
+<section id="proposal" class="level3">
+<h3 class="anchored" data-anchor-id="proposal">Proposal</h3>
 <p>I see the solution in two steps:</p>
 <ul>
 <li>Document the functions or methods using OpenMP or BLAS and can be configured with an environment variable or threadpoolctl.</li>
@@ -170,12 +179,12 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 </section>
 </section>
-<section id="multi-threaded-by-default" class="level3">
-<h3 class="anchored" data-anchor-id="multi-threaded-by-default">Multi-threaded by Default</h3>
+<section id="multi-threaded-by-default" class="level2">
+<h2 class="anchored" data-anchor-id="multi-threaded-by-default">Multi-threaded by Default</h2>
 <p>BLAS implementations such as OpenBLAS are multi-threaded by default. Scikit-learn followed this convention with OpenMP, which is also multi-threaded by default. Using all the CPU cores by default is convenient for interactive use cases like in a Jupyter Notebook. The downside of using all CPU cores is during deployment to shared environments. The user needs to know which API to configure their program to become serial from the above section.</p>
-<section id="proposal-1" class="level4">
-<h4 class="anchored" data-anchor-id="proposal-1">Proposal</h4>
-<p>There are two options here:</p>
+<section id="proposal-1" class="level3">
+<h3 class="anchored" data-anchor-id="proposal-1">Proposal</h3>
+<p>There are two options:</p>
 <ul>
 <li>Keep the status quo where BLAS is multi-threaded by default. Libraries such as scikit-learn’s OpenMP accelerated routines will continue to be parallel as the default.</li>
 <li>Migrate over to single-thread as the default. Each library has a global flag that configures all computations to be parallel.</li>
@@ -183,38 +192,38 @@ ul.task-list li input[type="checkbox"] {
 <p>In both cases, libraries still need to document the functions or methods that are parallalized with BLAS or OpenMP.</p>
 </section>
 </section>
-<section id="interactions-between-different-forms-of-parallelism" class="level3">
-<h3 class="anchored" data-anchor-id="interactions-between-different-forms-of-parallelism">Interactions Between Different Forms of Parallelism</h3>
+<section id="interactions-between-different-forms-of-parallelism" class="level2">
+<h2 class="anchored" data-anchor-id="interactions-between-different-forms-of-parallelism">Interactions Between Different Forms of Parallelism</h2>
 <p>When different parallelism interfaces are running concurrently, it is possible to run into crashes or oversubscription. The following is a list of known issues:</p>
 <ul>
 <li><code>libgomp</code> (OpenMP for GCC) is not fork-safe while libomp (OpenMP for Clang) is fork-safe. Scikit-learn has developed <a href="https://github.com/joblib/loky">loky</a> as a workaround. There is a <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60035">patch to GCC OpenMP</a> to make it fork safe, but it has not progressed. For details, see <a href="https://scikit-learn.org/stable/faq.html#why-do-i-sometime-get-a-crash-freeze-with-n-jobs-1-under-osx-or-linux">this FAQ entry</a>.</li>
 <li><code>libomp</code> (OpenMP for Clang) not compatible with libiomp (OpenMP for Intel Complier). The workaround is to set <code>MKL_THREADING_LAYER=GNU</code>. See <a href="https://github.com/joblib/threadpoolctl/blob/master/multiple_openmp.md">this link for details</a>.</li>
 <li><code>libgomp</code> (OpenMP for GCC) is also not compatible with libiomp (OpenMP for Intel Complier): <a href="https://github.com/pytorch/pytorch/issues/37377">pytorch#37377</a></li>
 <li>There are performance issues when OpenBLAS (built with pthreads) and OpenMP have separate threadpools: <a href="https://github.com/xianyi/OpenBLAS/issues/3187">OpenBLAS#3187</a>. A workaround is to share the same threadpool by building OpenBLAS with OpenMP.</li>
-<li>There are performance issues when two OpenBLAS are present, such as in NumPy and SciPy: <a href="https://github.com/scipy/scipy/issues/15129">scipy#15129</a>. The current workaround is to set OPENBLAS_THREAD_TIMEOUT=1 on the affected platforms.</li>
+<li>There are performance issues when two OpenBLAS are present, such as in NumPy and SciPy: <a href="https://github.com/scipy/scipy/issues/15129">scipy#15129</a>. The current workaround is to set <code>OPENBLAS_THREAD_TIMEOUT=1</code> on the affected platforms.</li>
 <li>Oversubscription when using Python multiprocessing with OpenBLAS or OpenMP running with multiple threads. Distributed Python libraries such as <a href="https://docs.dask.org/en/stable/array-best-practices.html#avoid-oversubscribing-threads">Dask</a> and <a href="https://docs.ray.io/en/latest/serve/scaling-and-resource-allocation.html#configuring-parallelism-with-omp-num-threads">Ray</a> recommend setting environment variables to configure OpenBLAS and OpenMP to run serially.</li>
 </ul>
-<section id="proposal-2" class="level4">
-<h4 class="anchored" data-anchor-id="proposal-2">Proposal</h4>
-<p>The following are feasible steps we can take to improve the issues listed above: - The library sends a warning or error to notify the user when a known issue is detected. For example, <a href="https://github.com/numba/numba/blob/2e9b58cfce0391b968ab8c7c84393cc12c4d1bfb/numba/np/ufunc/omppool.cpp#L107-L124">Numba detects</a> when libgomp and fork are used together, raising an error. - The library detects and raises a warning recommending <code>MKL_THREADING_LAYER</code> when LLVM OpenMP and Intel OpenMP are loaded together. For example, threadpoolctl <a href="https://github.com/joblib/threadpoolctl/blob/a39c6a49a297d0ef941269fc655670b63edab84c/threadpoolctl.py#L750-L762">has such a warning</a>. - Move towards a single OpenMP and OpenBLAS on PyPI by shipping an OpenMP and OpenBLAS wheel.NumPy, SciPy, and Scikit-learn will link to those libraries during runtime. Please see the <a href="#technical-details">technical details section</a> for details on how this could work.</p>
+<section id="proposal-2" class="level3">
+<h3 class="anchored" data-anchor-id="proposal-2">Proposal</h3>
+<p>The following are feasible steps we can take to improve the issues listed above: - The library sends a warning or error to notify the user when a known issue is detected. For example, <a href="https://github.com/numba/numba/blob/2e9b58cfce0391b968ab8c7c84393cc12c4d1bfb/numba/np/ufunc/omppool.cpp#L107-L124">Numba detects</a> when libgomp and fork are used together, raising an error. - The library detects and raises a warning recommending <code>MKL_THREADING_LAYER</code> when LLVM OpenMP and Intel OpenMP are loaded together. For example, threadpoolctl <a href="https://github.com/joblib/threadpoolctl/blob/a39c6a49a297d0ef941269fc655670b63edab84c/threadpoolctl.py#L750-L762">has such a warning</a>. - Move towards a single OpenMP and OpenBLAS on PyPI by shipping an OpenMP and OpenBLAS wheel. NumPy, SciPy, and Scikit-learn will link to those libraries during runtime. Please see the <a href="#technical-details">technical details section</a> for details on how this could work.</p>
 </section>
 </section>
 </section>
-<section id="technical-details" class="level2">
-<h2 class="anchored" data-anchor-id="technical-details">Technical Details</h2>
-<section id="how-to-ship-openmp-and-openblas-on-pypi" class="level3">
-<h3 class="anchored" data-anchor-id="how-to-ship-openmp-and-openblas-on-pypi">How to ship OpenMP and OpenBLAS on PyPI?</h3>
-<p>OpenMP and OpenBLAS are shipped wheels with their header files. When building an upstream library such as <code>NumPy,</code> extensions will use RPATH to link to the OpenMP and OpenBLAS wheels. <code>auditwheel repair</code> needs a patch so that it does not copy PyPi libraries into the wheel: <a href="https://github.com/pypa/auditwheel/pull/392">auditwheel#392</a>. Note that <a href="https://peps.python.org/pep-0513/#auditwheel">PEP513</a>, explicitly allows for shared libraries to be distributed as separate packages on PyPI.</p>
+<section id="technical-details" class="level1">
+<h1>Technical Details</h1>
+<section id="how-to-ship-openmp-and-openblas-on-pypi" class="level2">
+<h2 class="anchored" data-anchor-id="how-to-ship-openmp-and-openblas-on-pypi">How to ship OpenMP and OpenBLAS on PyPI?</h2>
+<p>OpenMP and OpenBLAS are shipped wheels with their header files. When building an upstream library such as NumPy, extensions will use RPATH to link to the OpenMP and OpenBLAS wheels. <code>auditwheel repair</code> needs a patch so that it does not copy PyPi libraries into the wheel: <a href="https://github.com/pypa/auditwheel/pull/392">auditwheel#392</a>. Note that <a href="https://peps.python.org/pep-0513/#auditwheel">PEP513</a>, explicitly allows for shared libraries to be distributed as separate packages on PyPI.</p>
 </section>
-<section id="which-compiler-to-use-for-openmp" class="level3">
-<h3 class="anchored" data-anchor-id="which-compiler-to-use-for-openmp">Which compiler to use for OpenMP?</h3>
+<section id="which-compiler-to-use-for-openmp" class="level2">
+<h2 class="anchored" data-anchor-id="which-compiler-to-use-for-openmp">Which compiler to use for OpenMP?</h2>
 <p>There are two options: libgomp (OpenMP for GCC) or libomp (Clang for GCC). libgomp is not fork safe, but uses the GCC. We advocate for the patch into GCC to make it fork safe. libomp is fork safe, but it is an implementation detail and not part of the OpenMP specification. I would go with libomp, because it has the same symbols as libgomp and is fork safe. Upstream libraries such as NumPy or SciPy can still use GCC as their compiler.</p>
 </section>
-<section id="what-does-conda-forge-do" class="level3">
-<h3 class="anchored" data-anchor-id="what-does-conda-forge-do">What does conda-forge do?</h3>
+<section id="how-does-conda-forge-work" class="level2">
+<h2 class="anchored" data-anchor-id="how-does-conda-forge-work">How does conda-forge work?</h2>
 <p>For BLAS, conda-forge builds with netlib. During installation time, BLAS can be switched to other implementations such as MKL, BLIS, OpenBLAS. See <a href="https://conda-forge.org/docs/maintainer/knowledge_base.html#switching-blas-implementation">this link for details</a>.</p>
 <p>For OpenMP, conda-forge builds with libgomp, the GNU build of OpenMP. During installation time, OpenMP can be switched to libomp, the LLVM build of OpenMP. Recall that the LLVM implementation is fork-safe. Note, that the GNU implementation has target offloading symbols, while LLVM does not. See this <a href="https://conda-forge.org/docs/maintainer/knowledge_base.html#openmp">link for details</a>.</p>
-<p>Lastly, Conda-forge has a mutex package ensuring that a single OpenMP or BLAS library is installed and loaded.</p>
+<p>Conda-forge has a mutex package ensuring that a single OpenMP or BLAS library is installed and loaded.</p>
 
 
 </section>
