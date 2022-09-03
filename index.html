@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Parallelism in Numerical Python Libraries - Parallalism in Numerical Python Libraries</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Parallelism in Numerical Python Libraries</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="./index.html" aria-current="page">
+  </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#current-landscape" id="toc-current-landscape" class="nav-link active" data-scroll-target="#current-landscape">Current Landscape</a></li>
+  <li><a href="#issues-with-the-current-landscape" id="toc-issues-with-the-current-landscape" class="nav-link" data-scroll-target="#issues-with-the-current-landscape">Issues with the Current Landscape</a>
+  <ul class="collapse">
+  <li><a href="#apis-for-configuring-parallelism" id="toc-apis-for-configuring-parallelism" class="nav-link" data-scroll-target="#apis-for-configuring-parallelism">APIs for Configuring Parallelism</a></li>
+  <li><a href="#multi-threaded-by-default" id="toc-multi-threaded-by-default" class="nav-link" data-scroll-target="#multi-threaded-by-default">Multi-threaded by Default</a></li>
+  <li><a href="#interactions-between-different-forms-of-parallelism" id="toc-interactions-between-different-forms-of-parallelism" class="nav-link" data-scroll-target="#interactions-between-different-forms-of-parallelism">Interactions Between Different Forms of Parallelism</a></li>
+  </ul></li>
+  <li><a href="#technical-details" id="toc-technical-details" class="nav-link" data-scroll-target="#technical-details">Technical Details</a>
+  <ul class="collapse">
+  <li><a href="#how-to-ship-openmp-and-openblas-on-pypi" id="toc-how-to-ship-openmp-and-openblas-on-pypi" class="nav-link" data-scroll-target="#how-to-ship-openmp-and-openblas-on-pypi">How to ship OpenMP and OpenBLAS on PyPI?</a></li>
+  <li><a href="#which-compiler-to-use-for-openmp" id="toc-which-compiler-to-use-for-openmp" class="nav-link" data-scroll-target="#which-compiler-to-use-for-openmp">Which compiler to use for OpenMP?</a></li>
+  <li><a href="#what-does-conda-forge-do" id="toc-what-does-conda-forge-do" class="nav-link" data-scroll-target="#what-does-conda-forge-do">What does conda-forge do?</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Parallalism in Numerical Python Libraries</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<p>Welcome to the Design Document for CPU parallelism in NumPy, SciPy, scikit-learn, and pandas. Each library has varying levels of support for running parallel computation. This document details the current status of parallelism with shipping code on PyPI and possible paths for improvement.</p>
+<section id="current-landscape" class="level2">
+<h2 class="anchored" data-anchor-id="current-landscape">Current Landscape</h2>
+<p>Each library ships with an assortment of parallel interfaces on PyPi:</p>
+<ul>
+<li>NumPy’s <code>linalg</code> module and matrix multiplication utilize OpenBLAS, which is multi-threaded by default. NumPy ships with OpenBLAS built with pthreads.</li>
+<li>SciPy’s <code>linalg</code> module uses OpenBLAS, which is also multi-threaded by default and built with pthreads. Functions with the <code>n_workers</code> parameter may use multiprocessing, multithreading module, or pthreads.</li>
+<li>By default, most computation in Pandas runs in serial. The only parallel mechanism is enabled through Numba by setting passing <code>parallel=True</code> to engine_kwargs.</li>
+<li>Scikit-learn uses the <code>linalg</code> module from NumPy and SciPy, which is multi-threaded by default. Scikit-learn ships with OpenMP and runs OpenMP accelerated code in parallel by default. The library also has a <code>n_jobs</code> parameter that uses Python’s multithreading or loky, an improved Python-based Process Pool Executor.</li>
+</ul>
+<p>On PyPi, if a library requires OpenMP or OpenBLAS, it bundles the shared library into the wheel: <a href="https://www.slideshare.net/RalfGommers/parallelism-in-a-numpybased-program">Source</a></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/pypi.jpg" class="img-fluid figure-img" alt="NumPy, SciPy, and Scikit-learn vendoring shared libraries such as OpenMP or OpenBLAS"></p>
+<p></p><figcaption class="figure-caption">Current PyPI landscape</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="issues-with-the-current-landscape" class="level2">
+<h2 class="anchored" data-anchor-id="issues-with-the-current-landscape">Issues with the Current Landscape</h2>
+<p>The current landscape has three broad categories of issues: - APIs for controlling parallelism is not consistent between libraries. - By default, BLAS and scikit-learn’s OpenMP are multi-threaded and can lead to unexpected problems. - Interactions between different forms of parallelism may lead to slowdowns, crashes, or oversubscription.</p>
+<section id="apis-for-configuring-parallelism" class="level3">
+<h3 class="anchored" data-anchor-id="apis-for-configuring-parallelism">APIs for Configuring Parallelism</h3>
+<p>There are three ways to configure parallelism across the libraries: environment variables, <code>threadpoolctl</code>, or library-specific Python API.</p>
+<p>Examples of environment variables consist of: - <code>OPENBLAS_NUM_THREADS</code> for OpenBLAS - <code>MKL_NUM_THREADS</code> for MKL - <code>OMP_NUM_THREADS</code> for OpenMP</p>
+<p>These environment variables control how many threads a specific backend uses. These environment variables do not influence code that does not use a particular backend, like OpenMP. For example, SciPy’s <code>fft</code> module uses pthreads directly.</p>
+<p>Threadpoolctl provides a Python interface for configuring the number of threads in OpenBLAS, MKL, and OpenMP. Linear algebra function calls from NumPy, SciPy, or scikit-learn can all be configured with threadpoolctl or an environment variable.</p>
+<p>SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy’s <code>n_workers</code> can mean multithreading, multiprocessing, or pthreads. Scikit-learn’s <code>n_jobs</code> is either multiprocessing or multithreading. threadpoolctl or <code>OMP_NUM_THREADS</code> configured scikit-learn’s computation routines that use OpenMP. Note that scikit-learn’s <code>n_jobs</code> does not configure OpenMP parallelism.</p>
+<section id="proposal" class="level4">
+<h4 class="anchored" data-anchor-id="proposal">Proposal</h4>
+<p>I see the solution in two steps:</p>
+<ul>
+<li>Document the functions or methods using OpenMP or BLAS and can be configured with an environment variable or threadpoolctl.</li>
+<li>Adopt a consistent Python API for configuring parallelism.</li>
+</ul>
+</section>
+</section>
+<section id="multi-threaded-by-default" class="level3">
+<h3 class="anchored" data-anchor-id="multi-threaded-by-default">Multi-threaded by Default</h3>
+<p>BLAS implementations such as OpenBLAS are multi-threaded by default. Scikit-learn followed this convention with OpenMP, which is also multi-threaded by default. Using all the CPU cores by default is convenient for interactive use cases like in a Jupyter Notebook. The downside of using all CPU cores is during deployment to shared environments. The user needs to know which API to configure their program to become serial from the above section.</p>
+<section id="proposal-1" class="level4">
+<h4 class="anchored" data-anchor-id="proposal-1">Proposal</h4>
+<p>There are two options here: - Keep the status quo where BLAS is multi-threaded by default. Libraries such as scikit-learn’s OpenMP accelerated routines will continue to be parallel as the default. - Migrate over to single-thread as the default. Each library has a global flag that configures all computations to be parallel.</p>
+<p>In both cases, libraries still need to document the functions or methods that are parallalized with BLAS or OpenMP.</p>
+</section>
+</section>
+<section id="interactions-between-different-forms-of-parallelism" class="level3">
+<h3 class="anchored" data-anchor-id="interactions-between-different-forms-of-parallelism">Interactions Between Different Forms of Parallelism</h3>
+<p>When different parallelism interfaces are running concurrently, it is possible to run into crashes or oversubscription. The following is a list of known issues:</p>
+<ul>
+<li><code>libgomp</code> (OpenMP for GCC) is not fork-safe while libomp (OpenMP for Clang) is fork-safe. Scikit-learn has developed <a href="https://github.com/joblib/loky">loky</a> as a workaround. There is a <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60035">patch to GCC OpenMP</a> to make it fork safe, but it has not progressed. For details, see <a href="https://scikit-learn.org/stable/faq.html#why-do-i-sometime-get-a-crash-freeze-with-n-jobs-1-under-osx-or-linux">this FAQ entry</a>.</li>
+<li><code>libomp</code> (OpenMP for Clang) not compatible with libiomp (OpenMP for Intel Complier). The workaround is to set MKL_THREADING_LAYER=GNU. See <a href="https://github.com/joblib/threadpoolctl/blob/master/multiple_openmp.md">this link</a> for details.</li>
+<li><code>libgomp</code> (OpenMP for GCC) is also not compatible with libiomp (OpenMP for Intel Complier): <a href="https://github.com/pytorch/pytorch/issues/37377">pytorch#37377</a></li>
+<li>There are performance issues when OpenBLAS (built with pthreads) and OpenMP have separate threadpools: <a href="https://github.com/xianyi/OpenBLAS/issues/3187">OpenBLAS#3187</a>. A workaround is to share the same threadpool by building OpenBLAS with OpenMP.</li>
+<li>There are performance issues when two OpenBLAS are present, such as in NumPy and SciPy: <a href="https://github.com/scipy/scipy/issues/15129">scipy#15129</a>. The current workaround is to set OPENBLAS_THREAD_TIMEOUT=1 on the affected platforms.</li>
+<li>Oversubscription when using Python multiprocessing with OpenBLAS or OpenMP running with multiple threads. Distributed Python libraries such as <a href="https://docs.dask.org/en/stable/array-best-practices.html#avoid-oversubscribing-threads">Dask</a> and <a href="https://docs.ray.io/en/latest/serve/scaling-and-resource-allocation.html#configuring-parallelism-with-omp-num-threads">Ray</a> recommend setting environment variables to configure OpenBLAS and OpenMP to run serially.</li>
+</ul>
+<section id="proposal-2" class="level4">
+<h4 class="anchored" data-anchor-id="proposal-2">Proposal</h4>
+<p>The following are feasible steps we can take to improve the issues listed above: - The library sends a warning or error to notify the user when a known issue is detected. For example, <a href="https://github.com/numba/numba/blob/2e9b58cfce0391b968ab8c7c84393cc12c4d1bfb/numba/np/ufunc/omppool.cpp#L107-L124">Numba detects</a> when libgomp and fork are used together, raising an error. - The library detects and raises a warning recommending <code>MKL_THREADING_LAYER</code> when LLVM OpenMP and Intel OpenMP are loaded together. For example, threadpoolctl <a href="https://github.com/joblib/threadpoolctl/blob/a39c6a49a297d0ef941269fc655670b63edab84c/threadpoolctl.py#L750-L762">has such a warning</a>. - Move towards a single OpenMP and OpenBLAS on PyPI by shipping an OpenMP and OpenBLAS wheel.NumPy, SciPy, and Scikit-learn will link to those libraries during runtime. Please see the <a href="#technical-details">technical details section</a> for details on how this could work.</p>
+</section>
+</section>
+</section>
+<section id="technical-details" class="level2">
+<h2 class="anchored" data-anchor-id="technical-details">Technical Details</h2>
+<section id="how-to-ship-openmp-and-openblas-on-pypi" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-ship-openmp-and-openblas-on-pypi">How to ship OpenMP and OpenBLAS on PyPI?</h3>
+<p>OpenMP and OpenBLAS are shipped wheels with their header files. When building an upstream library such as <code>NumPy,</code> extensions will use RPATH to link to the OpenMP and OpenBLAS wheels. <code>auditwheel repair</code> needs a patch so that it does not copy PyPi libraries into the wheel: <a href="https://github.com/pypa/auditwheel/pull/392">auditwheel#392</a>. Note that <a href="https://peps.python.org/pep-0513/#auditwheel">PEP513</a>, explicitly allows for shared libraries to be distributed as separate packages on PyPI.</p>
+</section>
+<section id="which-compiler-to-use-for-openmp" class="level3">
+<h3 class="anchored" data-anchor-id="which-compiler-to-use-for-openmp">Which compiler to use for OpenMP?</h3>
+<p>There are two options: libgomp (OpenMP for GCC) or libomp (Clang for GCC). libgomp is not fork safe, but uses the GCC. We advocate for the patch into GCC to make it fork safe. libomp is fork safe, but it is an implementation detail and not part of the OpenMP specification. I would go with libomp, because it has the same symbols as libgomp and is fork safe. Upstream libraries such as NumPy or SciPy can still use GCC as their compiler.</p>
+</section>
+<section id="what-does-conda-forge-do" class="level3">
+<h3 class="anchored" data-anchor-id="what-does-conda-forge-do">What does conda-forge do?</h3>
+<p>For BLAS, conda-forge builds with netlib. During installation time, BLAS can be switched to other implementations such as MKL, BLIS, OpenBLAS. See <a href="https://conda-forge.org/docs/maintainer/knowledge_base.html#switching-blas-implementation">this link</a> for details.</p>
+<p>For OpenMP, conda-forge builds with libgomp, the GNU build of OpenMP. During installation time, OpenMP can be switched to libomp, the LLVM build of OpenMP. Recall that the LLVM implementation is fork-safe. Note, that the GNU implementation has target offloading symbols, while LLVM does not. See this <a href="https://conda-forge.org/docs/maintainer/knowledge_base.html#openmp">link</a> for details.</p>
+<p>Lastly, Conda-forge has a mutex package ensuring that a single OpenMP or BLAS library is installed and loaded.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">Copyright 2022, Thomas J. Fan</div>   
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/thomaspfan/parallelism-python-libraries">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+</body></html>
