@@ -14,7 +14,7 @@ website:
     left: "Copyright 2022, Thomas J. Fan"
     right:
       - icon: github
-        href: https://github.com/thomaspfan/parallelism-python-libraries
+        href: https://github.com/thomasjpfan/parallelism-python-libraries-design
 
 format:
   html:
