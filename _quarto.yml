@@ -11,8 +11,7 @@ website:
       - href: index.qmd
         text: " "
   page-footer:
-    left: "Copyright 2022, Thomas J. Fan"
-    right:
+    left:
       - icon: github
         href: https://github.com/thomasjpfan/parallelism-python-libraries-design
 

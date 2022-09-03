@@ -28,7 +28,7 @@ The current landscape has three broad categories of issues:
 
 ## APIs for Configuring Parallelism
 
-There are three ways to configure parallelism across the libraries: environment variables, `threadpoolctl`, or library-specific Python API.
+There are three ways to configure parallelism across the libraries: environment variables, [threadpoolctl](https://github.com/joblib/threadpoolctl), or library-specific Python API.
 
 Examples of environment variables consist of:
 
