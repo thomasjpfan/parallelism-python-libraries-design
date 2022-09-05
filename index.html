@@ -119,7 +119,6 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#how-to-ship-openmp-and-openblas-on-pypi" id="toc-how-to-ship-openmp-and-openblas-on-pypi" class="nav-link" data-scroll-target="#how-to-ship-openmp-and-openblas-on-pypi">How to ship OpenMP and OpenBLAS on PyPI?</a></li>
   <li><a href="#which-compiler-to-use-for-openmp" id="toc-which-compiler-to-use-for-openmp" class="nav-link" data-scroll-target="#which-compiler-to-use-for-openmp">Which compiler to use for OpenMP?</a></li>
   <li><a href="#how-does-conda-forge-work" id="toc-how-does-conda-forge-work" class="nav-link" data-scroll-target="#how-does-conda-forge-work">How does conda-forge work?</a></li>
-  <li><a href="#which-api-to-use-for-parallalism" id="toc-which-api-to-use-for-parallalism" class="nav-link" data-scroll-target="#which-api-to-use-for-parallalism">Which API to use for parallalism?</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -180,13 +179,13 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 <p>These environment variables control how many threads a specific backend uses. These environment variables do not influence code that does not use a particular backend, like OpenMP. For example, SciPy’s <code>fft</code> module uses pthreads directly.</p>
 <p>Threadpoolctl provides a Python interface for configuring the number of threads in OpenBLAS, MKL, and OpenMP. Linear algebra function calls from NumPy, SciPy, or scikit-learn can all be configured with threadpoolctl or an environment variable.</p>
-<p>SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy’s <code>workers</code> can mean multithreading, multiprocessing, or pthreads. Scikit-learn’s <code>n_jobs</code> is either multiprocessing or multithreading. threadpoolctl or <code>OMP_NUM_THREADS</code> configured scikit-learn’s computation routines that use OpenMP. Note that scikit-learn’s <code>n_jobs</code> does not configure OpenMP parallelism.</p>
+<p>SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy’s <code>workers</code> can mean multithreading, multiprocessing, or pthreads. Scikit-learn’s <code>n_jobs</code> is either multiprocessing or multithreading. threadpoolctl or <code>OMP_NUM_THREADS</code> configured scikit-learn’s computation routines that use OpenMP. Note that scikit-learn’s <code>n_jobs</code> does not configure OpenMP or OpenBLAS parallelism.</p>
 <section id="proposal" class="level3">
 <h3 class="anchored" data-anchor-id="proposal">Proposal</h3>
-<p>I see the solution in two steps:</p>
+<p>Here is a possible two step solution:</p>
 <ul>
 <li>Document the functions or methods using OpenMP or BLAS and can be configured with an environment variable or threadpoolctl.</li>
-<li>Adopt a consistent Python API for configuring parallelism. I propose using SciPy’s <code>workers</code> parameter, because it is more consisntet in controlling the number of cores used. Please see the <a href="#which-api-to-use%20for-parallalism">technical details section</a> on how this could work.</li>
+<li>Adopt a consistent Python API for configuring parallelism. We use SciPy’s <code>workers</code> parameter, because it is more consisntet in controlling the number of cores used.</li>
 </ul>
 </section>
 </section>
@@ -240,10 +239,6 @@ ul.task-list li input[type="checkbox"] {
 <p>For BLAS, conda-forge builds with netlib. During installation time, BLAS can be switched to other implementations such as MKL, BLIS, OpenBLAS. See <a href="https://conda-forge.org/docs/maintainer/knowledge_base.html#switching-blas-implementation">this link for details</a>.</p>
 <p>For OpenMP, conda-forge builds with libgomp, the GNU build of OpenMP. During installation time, OpenMP can be switched to libomp, the LLVM build of OpenMP. Recall that the LLVM implementation is fork-safe. Note, that the GNU implementation has target offloading symbols, while LLVM does not. See this <a href="https://conda-forge.org/docs/maintainer/knowledge_base.html#openmp">link for details</a>.</p>
 <p>Conda-forge has a mutex package ensuring that a single OpenMP or BLAS library is installed and loaded.</p>
-</section>
-<section id="which-api-to-use-for-parallalism" class="level2">
-<h2 class="anchored" data-anchor-id="which-api-to-use-for-parallalism">Which API to use for parallalism?</h2>
-<p>Currently, SciPy’s <code>workers</code> parameter is more consistent compared to Scikit-learn’s <code>n_jobs</code> parameter whne it comes to controlling the number of CPU cores to use. Scikit-learn’s <code>n_jobs</code> does not configure multithreading when using OpenMP or OpenBLAS.</p>
 
 
 </section>
