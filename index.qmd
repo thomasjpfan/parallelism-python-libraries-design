@@ -46,7 +46,7 @@ SciPy and scikit-learn have a library-specific Python API for controlling parall
 Here is a possible two step solution:
 
 - Document the functions or methods using OpenMP or BLAS and can be configured with an environment variable or threadpoolctl.
-- Adopt a consistent Python API for configuring parallelism. We use SciPy's `workers` parameter, because it is more consisntet in controlling the number of cores used.
+- Adopt a consistent Python API for configuring parallelism. We use SciPy's `workers` parameter because it is more consistent in controlling the number of cores used.
 
 ## Multi-threaded by Default
 
