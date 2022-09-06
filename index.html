@@ -187,15 +187,14 @@ ul.task-list li input[type="checkbox"] {
 <p>Here is a two step proposal:</p>
 <ol type="1">
 <li>Document the functions or methods using OpenMP or BLAS and can be configured with an environment variable or threadpoolctl.</li>
-<li>Adopt a consistent Python API for configuring parallelism. We use SciPy’s <code>workers</code> parameter because it is more consistent in controlling the number of cores used. <code>workers</code> denotes any form of parallalism including: multi-threading, multiprocessing, OpenMP threads, or pthreads.</li>
-<li>If a library has nested parallal calls, it will configure the computational routines to prevent subscription. For example, if BLAS is called from multiple OpenMP threads, then the BLAS calls should be configured to run serially.</li>
+<li>Adopt a consistent Python API for configuring parallelism. We use SciPy’s <code>workers</code> parameter because it is more consistent in controlling the number of cores used. <code>workers</code> denotes any form of parallalism such as: multi-threading, multiprocessing, OpenMP threads, or pthreads. A library with nested parallel calls will configure the computational routines to prevent subscription. For example, if multiple OpenMP threads call BLAS routines, then BLAS is configured to run serially.</li>
 </ol>
 </section>
 </section>
 <section id="multi-threaded-by-default" class="level2">
 <h2 class="anchored" data-anchor-id="multi-threaded-by-default">Multi-threaded by Default</h2>
 <p>BLAS implementations such as OpenBLAS are multi-threaded by default. Scikit-learn followed this convention with OpenMP, which is also multi-threaded by default. Using all the CPU cores by default is convenient for interactive use cases like in a Jupyter Notebook. The downside of using all CPU cores is during deployment to shared environments. The user needs to know which API to configure their program to become serial from the above section.</p>
-<p>There is oversubscription when using Python multiprocessing or multi-thraeding together with OpenBLAS or OpenMP which uses multiple threads. Distributed Python libraries such as <a href="https://docs.dask.org/en/stable/array-best-practices.html#avoid-oversubscribing-threads">Dask</a> and <a href="https://docs.ray.io/en/latest/serve/scaling-and-resource-allocation.html#configuring-parallelism-with-omp-num-threads">Ray</a> recommend setting environment variables to configure OpenBLAS and OpenMP to run serially.</p>
+<p>There can be oversubscription when multiprocessing or multi-thraeding is used together with OpenBLAS or OpenMP. Distributed Python libraries such as <a href="https://docs.dask.org/en/stable/array-best-practices.html#avoid-oversubscribing-threads">Dask</a> and <a href="https://docs.ray.io/en/latest/serve/scaling-and-resource-allocation.html#configuring-parallelism-with-omp-num-threads">Ray</a> recommend setting environment variables to configure OpenBLAS and OpenMP to run serially.</p>
 <section id="proposal-1" class="level3">
 <h3 class="anchored" data-anchor-id="proposal-1">Proposal</h3>
 <p>Here are some possible paths we can take:</p>
@@ -245,11 +244,11 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="with-a-openmp-wheel-can-workers-configure-and-use-another-threading-api-like-pthreads" class="level2">
 <h2 class="anchored" data-anchor-id="with-a-openmp-wheel-can-workers-configure-and-use-another-threading-api-like-pthreads">With a <code>OpenMP</code> wheel, can <code>workers</code> configure and use another threading API like <code>pthreads</code>?</h2>
-<p>Yes, this design documentation does <strong>not</strong> restrict the usage of other API for parallalism. The only requirement is that if your library uses <code>OpenMP</code>, then link it to the <code>OpenMP</code> wheel. This way all libraries can share the same OpenMP thread pool.</p>
+<p>Yes, this design documentation does <strong>not</strong> restrict the usage of other API for parallelism. The only requirement is to link the library to the <code>OpenMP</code> wheel if it uses <code>OpenMP</code>. This way, all libraries can share the same OpenMP thread pool.</p>
 </section>
 <section id="can-the-multiprocessing-and-multithreading-modules-still-be-used" class="level2">
 <h2 class="anchored" data-anchor-id="can-the-multiprocessing-and-multithreading-modules-still-be-used">Can the <code>multiprocessing</code> and <code>multithreading</code> modules still be used?</h2>
-<p>Yes, this design documentation does <strong>not</strong> restrict the usage of other API for parallalism. If Python’s <code>multithreading</code> or <code>multiprocessing</code> fits your libraries use case, you are welcome to use them.</p>
+<p>Yes, this design documentation does <strong>not</strong> restrict the usage of other APIs for parallelism. If Python’s <code>multithreading</code> or <code>multiprocessing</code> fits your library’s use case, you are welcome to use them.</p>
 </section>
 <section id="how-does-conda-forge-work" class="level2">
 <h2 class="anchored" data-anchor-id="how-does-conda-forge-work">How does conda-forge work?</h2>
