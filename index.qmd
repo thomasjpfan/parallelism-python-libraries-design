@@ -97,6 +97,10 @@ There are two options: libgomp (OpenMP for GCC) or libomp (Clang for GCC).
 
 On PyPI, I propose we go with `libomp`, because it has the same symbols as libgomp and is fork safe. Upstream libraries such as NumPy or SciPy can still use GCC as their compiler. Package managers can still ship libraries linked with `libgomp`. SciPy has an existing discussion regarding OpenMP adoption and the compiler choice: [scipy#10239](https://github.com/scipy/scipy/issues/10239).
 
+## With a `OpenMP` wheel, can `workers` configure and use another threading API like `pthreads`?
+
+Yes, this design documentation does **not** restrict the usage of other API for parallalism. The only requirement is that if your library uses `OpenMP`, then link it to the `OpenMP` wheel. This way all libraries can share the same OpenMP thread pool.
+
 ## How does conda-forge work?
 
 For BLAS, conda-forge builds with netlib. During installation time, BLAS can be switched to other implementations such as MKL, BLIS, OpenBLAS. See [this link for details](https://conda-forge.org/docs/maintainer/knowledge_base.html#switching-blas-implementation).
