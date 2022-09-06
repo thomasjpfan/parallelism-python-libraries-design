@@ -187,7 +187,7 @@ ul.task-list li input[type="checkbox"] {
 <ol type="1">
 <li>Document the functions or methods using OpenMP or BLAS and can be configured with an environment variable or threadpoolctl.</li>
 <li>Adopt a consistent Python API for configuring parallelism. We use SciPy’s <code>workers</code> parameter because it is more consistent in controlling the number of cores used. <code>workers</code> denotes any form of parallalism including: multi-threading, multiprocessing, OpenMP threads, or pthreads.</li>
-<li>If a library has nested parallal calls, it will configure the computational routines to prevent subscription.</li>
+<li>If a library has nested parallal calls, it will configure the computational routines to prevent subscription. For example, if BLAS is called from multiple OpenMP threads, then the BLAS calls should be configured to run serially.</li>
 </ol>
 </section>
 </section>
