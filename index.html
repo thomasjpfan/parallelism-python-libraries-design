@@ -180,8 +180,8 @@ ul.task-list li input[type="checkbox"] {
 <li><code>OMP_NUM_THREADS</code> for OpenMP</li>
 </ul>
 <p>These environment variables control how many threads a specific backend uses. These environment variables do not influence code that does not use a particular backend, like OpenMP. For example, SciPy’s <code>fft</code> module uses pthreads directly.</p>
-<p>Threadpoolctl provides a Python interface for configuring the number of threads in OpenBLAS, MKL, and OpenMP. Linear algebra function calls from NumPy, SciPy, or scikit-learn can all be configured with threadpoolctl or an environment variable.</p>
-<p>SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy’s <code>workers</code> can mean multithreading, multiprocessing, or pthreads. Scikit-learn’s <code>n_jobs</code> is either multiprocessing or multithreading. threadpoolctl or <code>OMP_NUM_THREADS</code> configured scikit-learn’s computation routines that use OpenMP. Note that scikit-learn’s <code>n_jobs</code> does not configure OpenMP or OpenBLAS parallelism.</p>
+<p>Threadpoolctl provides a Python interface for configuring the number of threads in OpenBLAS, MKL, and OpenMP. Linear algebra function calls from NumPy, SciPy, or scikit-learn can all be configured with threadpoolctl or an environment variable. These configuration options also control Scikit-learn’s OpenMP routines.</p>
+<p>SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy’s <code>workers</code> can mean multi-threading, multiprocessing, or pthreads. Scikit-learn’s <code>n_jobs</code> is either multiprocessing or multi-threading. Note that scikit-learn’s <code>n_jobs</code> does not configure OpenMP or OpenBLAS parallelism.</p>
 <section id="proposal" class="level3">
 <h3 class="anchored" data-anchor-id="proposal">Proposal</h3>
 <p>Here is a two step proposal:</p>
