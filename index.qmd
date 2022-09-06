@@ -47,7 +47,7 @@ Here is a two step proposal:
 
 1. Document the functions or methods using OpenMP or BLAS and can be configured with an environment variable or threadpoolctl.
 2. Adopt a consistent Python API for configuring parallelism. We use SciPy's `workers` parameter because it is more consistent in controlling the number of cores used. `workers` denotes any form of parallalism including: multi-threading, multiprocessing, OpenMP threads, or pthreads.
-3. If a library has nested parallal calls, it will configure the computational routines to prevent subscription.
+3. If a library has nested parallal calls, it will configure the computational routines to prevent subscription. For example, if BLAS is called from multiple OpenMP threads, then the BLAS calls should be configured to run serially.
 
 ## Multi-threaded by Default
 
