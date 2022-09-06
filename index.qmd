@@ -80,9 +80,9 @@ The following are feasible steps we can take to improve the issues listed above:
 
 1. The library sends a warning or error to notify the user when a known issue is detected. For example, [Numba detects](https://github.com/numba/numba/blob/2e9b58cfce0391b968ab8c7c84393cc12c4d1bfb/numba/np/ufunc/omppool.cpp#L107-L124) when libgomp and fork are used together, raising an error.
 2. The library detects and raises a warning recommending `MKL_THREADING_LAYER` when LLVM OpenMP and Intel OpenMP are loaded together. For example, threadpoolctl [has such a warning](https://github.com/joblib/threadpoolctl/blob/a39c6a49a297d0ef941269fc655670b63edab84c/threadpoolctl.py#L750-L762).
-3. Move towards a single OpenMP and OpenBLAS on PyPI by shipping an OpenMP and OpenBLAS wheel. NumPy, SciPy, and Scikit-learn will link to those libraries during runtime. Please see the [technical details section](#how-to-ship-openmp-and-openblas-on-pypi) on how this could work.
+3. Move towards a single OpenMP and OpenBLAS on PyPI by shipping an OpenMP and OpenBLAS wheel. NumPy, SciPy, and Scikit-learn will link to those libraries during runtime. Please see the [FAQ section](#how-to-ship-openmp-and-openblas-on-pypi) for more information.
 
-# Technical Details
+# FAQ
 
 ## How to ship OpenMP and OpenBLAS on PyPI?
 
@@ -100,6 +100,10 @@ On PyPI, I propose we go with `libomp`, because it has the same symbols as libgo
 ## With a `OpenMP` wheel, can `workers` configure and use another threading API like `pthreads`?
 
 Yes, this design documentation does **not** restrict the usage of other API for parallalism. The only requirement is that if your library uses `OpenMP`, then link it to the `OpenMP` wheel. This way all libraries can share the same OpenMP thread pool.
+
+## Can the `multiprocessing` and `multithreading` modules still be used?
+
+Yes, this design documentation does **not** restrict the usage of other API for parallalism. If Python's `multithreading` or `multiprocessing` fits your libraries use case, you are welcome to use them.
 
 ## How does conda-forge work?
 
