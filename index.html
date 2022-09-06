@@ -120,6 +120,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#which-compiler-to-use-for-openmp" id="toc-which-compiler-to-use-for-openmp" class="nav-link" data-scroll-target="#which-compiler-to-use-for-openmp">Which compiler to use for OpenMP?</a></li>
   <li><a href="#with-a-openmp-wheel-can-workers-configure-and-use-another-threading-api-like-pthreads" id="toc-with-a-openmp-wheel-can-workers-configure-and-use-another-threading-api-like-pthreads" class="nav-link" data-scroll-target="#with-a-openmp-wheel-can-workers-configure-and-use-another-threading-api-like-pthreads">With a <code>OpenMP</code> wheel, can <code>workers</code> configure and use another threading API like <code>pthreads</code>?</a></li>
   <li><a href="#can-the-multiprocessing-and-multithreading-modules-still-be-used" id="toc-can-the-multiprocessing-and-multithreading-modules-still-be-used" class="nav-link" data-scroll-target="#can-the-multiprocessing-and-multithreading-modules-still-be-used">Can the <code>multiprocessing</code> and <code>multithreading</code> modules still be used?</a></li>
+  <li><a href="#what-to-do-with-nested-parallel-calls" id="toc-what-to-do-with-nested-parallel-calls" class="nav-link" data-scroll-target="#what-to-do-with-nested-parallel-calls">What to do with nested parallel calls?</a></li>
   <li><a href="#how-does-conda-forge-work" id="toc-how-does-conda-forge-work" class="nav-link" data-scroll-target="#how-does-conda-forge-work">How does conda-forge work?</a></li>
   </ul></li>
   </ul>
@@ -187,7 +188,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Here is a two step proposal:</p>
 <ol type="1">
 <li>Document the functions or methods using OpenMP or BLAS and can be configured with an environment variable or threadpoolctl.</li>
-<li>Adopt a consistent Python API for configuring parallelism. We use SciPy’s <code>workers</code> parameter because it is more consistent in controlling the number of cores used. <code>workers</code> denotes any form of parallalism such as: multi-threading, multiprocessing, OpenMP threads, or pthreads. A library with nested parallel calls will configure the computational routines to prevent subscription. For example, if multiple OpenMP threads call BLAS routines, then BLAS is configured to run serially.</li>
+<li>Adopt a consistent Python API for configuring parallelism. We use SciPy’s <code>workers</code> parameter because it is more consistent in controlling the number of cores used. <code>workers</code> denotes any form of parallalism such as: multi-threading, multiprocessing, OpenMP threads, or pthreads. Please see the <a href="#with-a-openmp-wheel-can-workers-configure-and-use-another-threading-api-like-pthreads">FAQ section</a> for more information.</li>
 </ol>
 </section>
 </section>
@@ -249,6 +250,10 @@ ul.task-list li input[type="checkbox"] {
 <section id="can-the-multiprocessing-and-multithreading-modules-still-be-used" class="level2">
 <h2 class="anchored" data-anchor-id="can-the-multiprocessing-and-multithreading-modules-still-be-used">Can the <code>multiprocessing</code> and <code>multithreading</code> modules still be used?</h2>
 <p>Yes, this design documentation does <strong>not</strong> restrict the usage of other APIs for parallelism. If Python’s <code>multithreading</code> or <code>multiprocessing</code> fits your library’s use case, you are welcome to use them.</p>
+</section>
+<section id="what-to-do-with-nested-parallel-calls" class="level2">
+<h2 class="anchored" data-anchor-id="what-to-do-with-nested-parallel-calls">What to do with nested parallel calls?</h2>
+<p>Libraries will do their best to account for over-subscription from nested parallelism. For example, if multiple OpenMP threads call a BLAS routine, then the BLAS routine is configured to run serially. On the other hand, a library can have an API to perform multiprocessing on a user-defined function. If the user-defined function is also parallelized, then there is nested parallelism. The best a library can do is to document how its parallelism interacts with user-defined functions.</p>
 </section>
 <section id="how-does-conda-forge-work" class="level2">
 <h2 class="anchored" data-anchor-id="how-does-conda-forge-work">How does conda-forge work?</h2>
