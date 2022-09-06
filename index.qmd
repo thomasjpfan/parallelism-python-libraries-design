@@ -38,9 +38,9 @@ Examples of environment variables consist of:
 
 These environment variables control how many threads a specific backend uses. These environment variables do not influence code that does not use a particular backend, like OpenMP. For example, SciPy's `fft` module uses pthreads directly.
 
-Threadpoolctl provides a Python interface for configuring the number of threads in OpenBLAS, MKL, and OpenMP. Linear algebra function calls from NumPy, SciPy, or scikit-learn can all be configured with threadpoolctl or an environment variable.
+Threadpoolctl provides a Python interface for configuring the number of threads in OpenBLAS, MKL, and OpenMP. Linear algebra function calls from NumPy, SciPy, or scikit-learn can all be configured with threadpoolctl or an environment variable. These configuration options also control Scikit-learn's OpenMP routines.
 
-SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy's `workers` can mean multithreading, multiprocessing, or pthreads. Scikit-learn's `n_jobs` is either multiprocessing or multithreading. threadpoolctl or `OMP_NUM_THREADS` configured scikit-learn's computation routines that use OpenMP. Note that scikit-learn's `n_jobs` does not configure OpenMP or OpenBLAS parallelism.
+SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy's `workers` can mean multi-threading, multiprocessing, or pthreads. Scikit-learn's `n_jobs` is either multiprocessing or multi-threading. Note that scikit-learn's `n_jobs` does not configure OpenMP or OpenBLAS parallelism.
 
 ### Proposal
 Here is a two step proposal:
