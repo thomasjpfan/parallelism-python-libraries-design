@@ -201,7 +201,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Here are some possible paths we can take:</p>
 <ol type="1">
 <li>Keep the status quo where BLAS is multi-threaded by default. SciPy’s <code>linalg</code> module or scikit-learn’s OpenMP accelerated routines will continue to be parallel as the default.</li>
-<li>Libraries all have a serial fallback and we only ship the serial form on PyPi. We encourge OpenMP anywhere the whole stack is built in in a consistent fashion.</li>
+<li>Libraries all have a serial fallback and we only ship the serial form on PyPi. We encourage OpenMP anywhere the whole stack is built in in a consistent fashion.</li>
 <li>Migrate from multi-threaded to single-thread as the default. Each library has the option to include a global flag that configures all computations to be parallel.</li>
 </ol>
 <p>Options 2 and 3 helps with oversubscription because the library is serial by default.</p>
@@ -211,7 +211,7 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="interactions-between-different-forms-of-parallelism">Interactions Between Different Forms of Parallelism</h2>
 <p>When different parallelism interfaces are running concurrently, it is possible to run into crashes or oversubscription. The following is a list of known issues:</p>
 <ul>
-<li><code>libgomp</code> (OpenMP for GCC) is not fork-safe while libomp (OpenMP for Clang) is fork-safe. Scikit-learn has developed <a href="https://github.com/joblib/loky">loky</a> as a workaround. There is a <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60035">patch to GCC OpenMP</a> to make it fork safe, but it has not progressed. For details, see <a href="https://scikit-learn.org/stable/faq.html#why-do-i-sometime-get-a-crash-freeze-with-n-jobs-1-under-osx-or-linux">scikit-learn’s FAQ entry</a>.</li>
+<li><code>libgomp</code> (OpenMP for GCC) is not fork-safe while libomp (OpenMP for Clang) is fork-safe. Scikit-learn’s community developed <a href="https://github.com/joblib/loky">loky</a> as a workaround. There is a <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60035">patch to GCC OpenMP</a> to make it fork safe, but it has not progressed. For details, see <a href="https://scikit-learn.org/stable/faq.html#why-do-i-sometime-get-a-crash-freeze-with-n-jobs-1-under-osx-or-linux">scikit-learn’s FAQ entry</a>.</li>
 <li><code>libomp</code> (OpenMP for Clang) not compatible with libiomp (OpenMP for Intel Complier). The workaround is to set <code>MKL_THREADING_LAYER=GNU</code>. See <a href="https://github.com/joblib/threadpoolctl/blob/master/multiple_openmp.md">this link for details</a>.</li>
 <li><code>libgomp</code> (OpenMP for GCC) is also not compatible with libiomp (OpenMP for Intel Complier): <a href="https://github.com/pytorch/pytorch/issues/37377">pytorch#37377</a></li>
 <li>There are performance issues when OpenBLAS (built with pthreads) and OpenMP have separate thread pools: <a href="https://github.com/xianyi/OpenBLAS/issues/3187">OpenBLAS#3187</a>. A workaround is to share the same thread pool by building OpenBLAS with OpenMP.</li>
@@ -232,7 +232,7 @@ ul.task-list li input[type="checkbox"] {
 <h1>FAQ</h1>
 <section id="how-to-ship-openmp-and-openblas-on-pypi" class="level2">
 <h2 class="anchored" data-anchor-id="how-to-ship-openmp-and-openblas-on-pypi">How to ship OpenMP and OpenBLAS on PyPI?</h2>
-<p>OpenMP and OpenBLAS are shipped with their header files. When building an upstream library such as NumPy, extensions will use RPATH to link to the OpenMP and OpenBLAS wheels. <code>auditwheel repair</code> needs a patch so that it does not copy PyPi libraries into the wheel: <a href="https://github.com/pypa/auditwheel/pull/392">auditwheel#392</a>. Note that <a href="https://peps.python.org/pep-0513/#auditwheel">PEP513</a>, explicitly allows for shared libraries to be distributed as separate packages on PyPI.</p>
+<p>OpenMP and OpenBLAS are shipped with their header files. When building an upstream library such as NumPy, extensions will use RPATH to link to the OpenMP and OpenBLAS wheels. <code>auditwheel repair</code> needs a patch so that it does not copy PyPi libraries into the wheel: <a href="https://github.com/pypa/auditwheel/pull/392">auditwheel#392</a>. Note that <a href="https://peps.python.org/pep-0513/#auditwheel">PEP513</a> explicitly allows for shared libraries to be distributed as separate packages on PyPI.</p>
 </section>
 <section id="which-compiler-to-use-for-openmp" class="level2">
 <h2 class="anchored" data-anchor-id="which-compiler-to-use-for-openmp">Which compiler to use for OpenMP?</h2>
