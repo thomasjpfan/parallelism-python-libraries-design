@@ -46,7 +46,7 @@ SciPy and scikit-learn have a library-specific Python API for controlling parall
 Here is a two step proposal:
 
 1. Document the functions or methods using OpenMP or BLAS and can be configured with an environment variable or threadpoolctl.
-2. Adopt a consistent Python API for configuring parallelism. We use SciPy's `workers` parameter because it is more consistent in controlling the number of cores used. `workers` denotes any form of parallalism such as: multi-threading, multiprocessing, OpenMP threads, or pthreads. A library with nested parallel calls will configure the computational routines to prevent subscription. For example, if multiple OpenMP threads call BLAS routines, then BLAS is configured to run serially.
+2. Adopt a consistent Python API for configuring parallelism. We use SciPy's `workers` parameter because it is more consistent in controlling the number of cores used. `workers` denotes any form of parallalism such as: multi-threading, multiprocessing, OpenMP threads, or pthreads. Please see the [FAQ section](#with-a-openmp-wheel-can-workers-configure-and-use-another-threading-api-like-pthreads) for more information.
 
 ## Multi-threaded by Default
 
@@ -103,6 +103,10 @@ Yes, this design documentation does **not** restrict the usage of other API for 
 ## Can the `multiprocessing` and `multithreading` modules still be used?
 
 Yes, this design documentation does **not** restrict the usage of other APIs for parallelism. If Python's `multithreading` or `multiprocessing` fits your library's use case, you are welcome to use them.
+
+## What to do with nested parallel calls?
+
+Libraries will do their best to account for over-subscription from nested parallelism. For example, if multiple OpenMP threads call a BLAS routine, then the BLAS routine is configured to run serially. On the other hand, a library can have an API to perform multiprocessing on a user-defined function. If the user-defined function is also parallelized, then there is nested parallelism. The best a library can do is to document how its parallelism interacts with user-defined functions.
 
 ## How does conda-forge work?
 
