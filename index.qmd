@@ -1,5 +1,5 @@
 ---
-title: "Parallalism in Numerical Python Libraries"
+title: "Parallelism in Numerical Python Libraries"
 ---
 
 Welcome to the Design Document for CPU parallelism in NumPy, SciPy, scikit-learn, and pandas. Each library has varying levels of support for running parallel computation. This document details the current status of parallelism with shipping code on PyPI and possible paths for improvement.
@@ -9,7 +9,7 @@ Welcome to the Design Document for CPU parallelism in NumPy, SciPy, scikit-learn
 Each library ships with an assortment of parallel interfaces on PyPi:
 
 - NumPy's `linalg` module and matrix multiplication utilize OpenBLAS, which is multi-threaded by default. NumPy ships with OpenBLAS built with pthreads.
-- SciPy's `linalg` module uses OpenBLAS, which is also multi-threaded by default and built with pthreads. Functions with the `workers` parameter may use multiprocessing, multi-threading, or pthreads.
+- SciPy's `linalg` module uses OpenBLAS, which is also multi-threaded by default and built with pthreads. Functions with the `workers` parameter may use multiprocessing, multithreading, or pthreads.
 - By default, most computation in Pandas runs in serial. The only parallel mechanism is enabled through Numba by setting passing `parallel=True` to engine_kwargs.
 - Scikit-learn uses the `linalg` module from NumPy and SciPy, which is multi-threaded by default. Scikit-learn ships with OpenMP and runs OpenMP accelerated code in parallel by default. The library also has a `n_jobs` parameter that uses Python's multithreading or [loky](https://github.com/joblib/loky), an improved Python-based Process Pool Executor.
 
@@ -40,13 +40,13 @@ These environment variables control how many threads a specific backend uses. Th
 
 Threadpoolctl provides a Python interface for configuring the number of threads in OpenBLAS, MKL, and OpenMP. Linear algebra function calls from NumPy, SciPy, or scikit-learn can all be configured with threadpoolctl or an environment variable. These configuration options also control Scikit-learn's OpenMP routines.
 
-SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy's `workers` can mean multi-threading, multiprocessing, or pthreads. Scikit-learn's `n_jobs` is either multiprocessing or multi-threading. Note that scikit-learn's `n_jobs` does not configure OpenMP or OpenBLAS parallelism.
+SciPy and scikit-learn have a library-specific Python API for controlling parallelism. SciPy's `workers` can mean multithreading, multiprocessing, or pthreads. Scikit-learn's `n_jobs` is either multiprocessing or multithreading. Note that scikit-learn's `n_jobs` does not configure OpenMP or OpenBLAS parallelism.
 
 ### Proposal
 Here is a two step proposal:
 
 1. Document the functions or methods using OpenMP or BLAS and can be configured with an environment variable or threadpoolctl.
-2. Adopt a consistent Python API for configuring parallelism. We use SciPy's `workers` parameter because it is more consistent in controlling the number of cores used. `workers` denotes any form of parallalism such as: multi-threading, multiprocessing, OpenMP threads, or pthreads. Please see the [FAQ section](#with-a-openmp-wheel-can-workers-configure-and-use-another-threading-api-like-pthreads) for more information.
+2. Adopt a consistent Python API for configuring parallelism. We use SciPy's `workers` parameter because it is more consistent in controlling the number of cores used. `workers` denotes any form of parallelism such as: multi-threading, multiprocessing, OpenMP threads, or pthreads. Please see the [FAQ section](#with-a-openmp-wheel-can-workers-configure-and-use-another-threading-api-like-pthreads) for more information.
 
 ## Multi-threaded by Default
 
@@ -61,7 +61,7 @@ Here are some possible paths we can take:
 2. Libraries all have a serial fallback and we only ship the serial form on PyPi. We encourge OpenMP anywhere the whole stack is built in in a consistent fashion.
 3. Migrate from multi-threaded to single-thread as the default. Each library has the option to include a global flag that configures all computations to be parallel.
 
-Options 2 and 3 helps with oversubsctiption because the library is serial by default.
+Options 2 and 3 helps with oversubscription because the library is serial by default.
 
 ## Interactions Between Different Forms of Parallelism
 
@@ -70,7 +70,7 @@ When different parallelism interfaces are running concurrently, it is possible t
 - `libgomp` (OpenMP for GCC) is not fork-safe while libomp (OpenMP for Clang) is fork-safe. Scikit-learn has developed [loky](https://github.com/joblib/loky)  as a workaround. There is a [patch to GCC OpenMP](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60035) to make it fork safe, but it has not progressed. For details, see [scikit-learn's FAQ entry](https://scikit-learn.org/stable/faq.html#why-do-i-sometime-get-a-crash-freeze-with-n-jobs-1-under-osx-or-linux).
 - `libomp` (OpenMP for Clang) not compatible with libiomp (OpenMP for Intel Complier). The workaround is to set `MKL_THREADING_LAYER=GNU`. See [this link for details](https://github.com/joblib/threadpoolctl/blob/master/multiple_openmp.md).
 - `libgomp` (OpenMP for GCC) is also not compatible with libiomp (OpenMP for Intel Complier): [pytorch#37377](https://github.com/pytorch/pytorch/issues/37377)
-- There are performance issues when OpenBLAS (built with pthreads) and OpenMP have separate threadpools: [OpenBLAS#3187](https://github.com/xianyi/OpenBLAS/issues/3187). A workaround is to share the same threadpool by building OpenBLAS with OpenMP.
+- There are performance issues when OpenBLAS (built with pthreads) and OpenMP have separate thread pools: [OpenBLAS#3187](https://github.com/xianyi/OpenBLAS/issues/3187). A workaround is to share the same thread pool by building OpenBLAS with OpenMP.
 - There are performance issues when two OpenBLAS are present, such as in NumPy and SciPy: [scipy#15129](https://github.com/scipy/scipy/issues/15129). The current workaround is to set `OPENBLAS_THREAD_TIMEOUT=1` on the affected platforms.
 
 
@@ -85,7 +85,7 @@ The following are feasible steps we can take to improve the issues listed above:
 
 ## How to ship OpenMP and OpenBLAS on PyPI?
 
-OpenMP and OpenBLAS are shipped wheels with their header files. When building an upstream library such as NumPy, extensions will use RPATH to link to the OpenMP and OpenBLAS wheels. `auditwheel repair` needs a patch so that it does not copy PyPi libraries into the wheel: [auditwheel#392](https://github.com/pypa/auditwheel/pull/392). Note that [PEP513](https://peps.python.org/pep-0513/#auditwheel), explicitly allows for shared libraries to be distributed as separate packages on PyPI.
+OpenMP and OpenBLAS are shipped with their header files. When building an upstream library such as NumPy, extensions will use RPATH to link to the OpenMP and OpenBLAS wheels. `auditwheel repair` needs a patch so that it does not copy PyPi libraries into the wheel: [auditwheel#392](https://github.com/pypa/auditwheel/pull/392). Note that [PEP513](https://peps.python.org/pep-0513/#auditwheel), explicitly allows for shared libraries to be distributed as separate packages on PyPI.
 
 ## Which compiler to use for OpenMP?
 
