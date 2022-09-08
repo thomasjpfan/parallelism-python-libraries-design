@@ -20,6 +20,7 @@ format:
     theme: pulse
     css: styles.css
     toc: true
-
-
+  docx:
+    reference-doc: custom-reference-doc.docx
+    output-file: parallelism-numerical-python
 
