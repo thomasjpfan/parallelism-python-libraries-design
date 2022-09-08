@@ -9,7 +9,7 @@ Welcome to the Design Document for CPU parallelism in NumPy, SciPy, scikit-learn
 Each library ships with an assortment of parallel interfaces on PyPi:
 
 - NumPy's `linalg` module and matrix multiplication utilize OpenBLAS, which is multi-threaded by default. NumPy ships with OpenBLAS built with pthreads.
-- SciPy's `linalg` module uses OpenBLAS, which is also multi-threaded by default and built with pthreads. SciPy also has a `workers` parameter may use multiprocessing, multithreading, or pthreads.
+- SciPy's `linalg` module uses OpenBLAS, which is also multi-threaded by default and built with pthreads. SciPy also has a `workers` parameter that may multiprocessing, multithreading, or pthreads.
 - By default, most computation in Pandas runs in serial. The only parallel mechanism is enabled through Numba by setting passing `parallel=True` to engine_kwargs.
 - Scikit-learn uses the `linalg` module from NumPy and SciPy, which is multi-threaded by default. Scikit-learn ships with OpenMP and runs OpenMP accelerated code in parallel by default. The library also has a `n_jobs` parameter that uses Python's multithreading or [loky](https://github.com/joblib/loky), an improved Python-based Process Pool Executor.
 
@@ -22,7 +22,7 @@ On PyPi, if a library requires OpenMP or OpenBLAS, it bundles the shared library
 
 The current landscape has three broad categories of issues:
 
-- APIs for controlling parallelism is not consistent between libraries.
+- APIs for controlling parallelism are not consistent between libraries.
 - By default, BLAS and scikit-learn's OpenMP are multi-threaded and can lead to unexpected problems.
 - Interactions between different forms of parallelism may lead to slowdowns, crashes, or oversubscription.
 
