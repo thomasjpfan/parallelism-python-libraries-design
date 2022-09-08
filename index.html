@@ -151,7 +151,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Each library ships with an assortment of parallel interfaces on PyPi:</p>
 <ul>
 <li>NumPy’s <code>linalg</code> module and matrix multiplication utilize OpenBLAS, which is multi-threaded by default. NumPy ships with OpenBLAS built with pthreads.</li>
-<li>SciPy’s <code>linalg</code> module uses OpenBLAS, which is also multi-threaded by default and built with pthreads. SciPy also has a <code>workers</code> parameter may use multiprocessing, multithreading, or pthreads.</li>
+<li>SciPy’s <code>linalg</code> module uses OpenBLAS, which is also multi-threaded by default and built with pthreads. SciPy also has a <code>workers</code> parameter that may multiprocessing, multithreading, or pthreads.</li>
 <li>By default, most computation in Pandas runs in serial. The only parallel mechanism is enabled through Numba by setting passing <code>parallel=True</code> to engine_kwargs.</li>
 <li>Scikit-learn uses the <code>linalg</code> module from NumPy and SciPy, which is multi-threaded by default. Scikit-learn ships with OpenMP and runs OpenMP accelerated code in parallel by default. The library also has a <code>n_jobs</code> parameter that uses Python’s multithreading or <a href="https://github.com/joblib/loky">loky</a>, an improved Python-based Process Pool Executor.</li>
 </ul>
@@ -167,7 +167,7 @@ ul.task-list li input[type="checkbox"] {
 <h1>Issues with the Current Landscape</h1>
 <p>The current landscape has three broad categories of issues:</p>
 <ul>
-<li>APIs for controlling parallelism is not consistent between libraries.</li>
+<li>APIs for controlling parallelism are not consistent between libraries.</li>
 <li>By default, BLAS and scikit-learn’s OpenMP are multi-threaded and can lead to unexpected problems.</li>
 <li>Interactions between different forms of parallelism may lead to slowdowns, crashes, or oversubscription.</li>
 </ul>
